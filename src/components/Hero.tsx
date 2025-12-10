@@ -7,11 +7,9 @@ interface HeroProps {
 }
 
 export function Hero({ isDarkTheme, onDemoClick }: HeroProps) {
-  //
   // -----------------------------
   //  ПАРАЛЛАКС ФОНА (СПОТЛАЙТ)
   // -----------------------------
-  //
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -27,11 +25,9 @@ export function Hero({ isDarkTheme, onDemoClick }: HeroProps) {
     return () => window.removeEventListener("mousemove", handler);
   }, []);
 
-  //
   // -----------------------------
-  //  ЭФФЕКТ ПОЯВЛЕНИЯ ТЕКСТА ПРИ СКРОЛЛЕ
+  //  АНИМАЦИЯ ТЕКСТА ПРИ СКРОЛЛЕ
   // -----------------------------
-  //
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const { scrollYProgress } = useScroll({
     target: scrollRef,
@@ -41,11 +37,9 @@ export function Hero({ isDarkTheme, onDemoClick }: HeroProps) {
   const textOpacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
   const textY = useTransform(scrollYProgress, [0, 1], [40, 0]);
 
-  //
   // -----------------------------
   //  3D TILT + LIGHT SWEEP BUTTON
   // -----------------------------
-  //
   const tiltRef = useRef<HTMLButtonElement | null>(null);
   const tiltX = useMotionValue(0);
   const tiltY = useMotionValue(0);
@@ -73,7 +67,7 @@ export function Hero({ isDarkTheme, onDemoClick }: HeroProps) {
         ${isDarkTheme ? "bg-black" : "bg-white"}
       `}
     >
-      {/* Динамический параллакс-спотлайт позади */}
+      {/* Параллакс-спотлайт */}
       <motion.div
         style={{ left: parallaxX, top: parallaxY }}
         className={`
@@ -86,111 +80,131 @@ export function Hero({ isDarkTheme, onDemoClick }: HeroProps) {
         `}
       />
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        {/* АНИМИРОВАННЫЙ ТЕКСТ HERO */}
-        <motion.h1
-          style={{ opacity: textOpacity, y: textY }}
-          transition={{ duration: 0.8 }}
-          className={`text-5xl md:text-6xl font-semibold leading-tight mb-10
-            ${isDarkTheme ? "text-white" : "text-gray-900"}
-          `}
-        >
-          Ваш ИИ-юрист, который не спит.
-          <span
-            className={`block mt-5 ${
-              isDarkTheme ? "text-gray-400" : "text-gray-500"
-            }`}
+      <div
+        className={`
+          max-w-7xl mx-auto relative z-10 
+          grid grid-cols-1 lg:grid-cols-2 gap-16 items-center
+        `}
+      >
+        {/* ЛЕВАЯ КОЛОНКА — ТЕКСТ */}
+        <div>
+          <motion.h1
+            style={{ opacity: textOpacity, y: textY }}
+            transition={{ duration: 0.8 }}
+            className={`text-5xl md:text-6xl font-semibold leading-tight mb-10
+              ${isDarkTheme ? "text-white" : "text-gray-900"}
+            `}
           >
-            Автоматизируйте рутину — фокусируйтесь на стратегии.
-          </span>
-        </motion.h1>
+            Ваш ИИ-юрист, который не спит.
+            <span
+              className={`block mt-5 ${
+                isDarkTheme ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
+              Автоматизируйте рутину — фокусируйтесь на стратегии.
+            </span>
+          </motion.h1>
 
-        {/* 3D TILT CTA BUTTON */}
-        <motion.button
-          ref={tiltRef}
-          onMouseMove={handleMove}
-          onMouseLeave={resetTilt}
-          style={{
-            rotateX,
-            rotateY,
-            transformPerspective: 900,
-          }}
-          initial={{ opacity: 0, y: 25, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          onClick={onDemoClick}
-          className="
-            relative px-12 py-5 text-xl rounded-xl font-semibold
-            bg-[#4F46E5] text-white shadow-2xl hover:bg-[#4338CA]
-            transition-all duration-300 overflow-hidden
-          "
-        >
-          Забронировать демо
-
-          {/* LIGHT SWEEP */}
-          <motion.span
-            initial={{ x: "-130%" }}
-            animate={{ x: "230%" }}
-            transition={{
-              duration: 2.8,
-              repeat: Infinity,
-              repeatType: "loop",
-              ease: "easeInOut",
-              delay: 1,
+          {/* CTA кнопка */}
+          <motion.button
+            ref={tiltRef}
+            onMouseMove={handleMove}
+            onMouseLeave={resetTilt}
+            style={{
+              rotateX,
+              rotateY,
+              transformPerspective: 900,
             }}
+            initial={{ opacity: 0, y: 25, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            onClick={onDemoClick}
             className="
-              absolute top-0 h-full w-1/4 
-              bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.8),transparent)]
-              opacity-70 blur-lg
+              relative px-12 py-5 text-xl rounded-xl font-semibold
+              bg-[#4F46E5] text-white shadow-2xl hover:bg-[#4338CA]
+              transition-all duration-300 overflow-hidden
             "
-          />
+          >
+            Забронировать демо
 
-          {/* BREATHING GLOW */}
-          <motion.span
-            initial={{ opacity: 0.3, scale: 1 }}
-            animate={{ opacity: 0.85, scale: 1.15 }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              repeatType: "mirror",
-              ease: "easeInOut",
-            }}
-            className="
-              absolute inset-0 -z-20 rounded-xl
-              bg-[radial-gradient(circle,_rgba(124,58,237,0.55)_0%,_transparent_75%)]
-              blur-2xl
-            "
-          />
+            {/* LIGHT SWEEP */}
+            <motion.span
+              initial={{ x: "-130%" }}
+              animate={{ x: "230%" }}
+              transition={{
+                duration: 2.8,
+                repeat: Infinity,
+                repeatType: "loop",
+                ease: "easeInOut",
+                delay: 1,
+              }}
+              className="
+                absolute top-0 h-full w-1/4 
+                bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.8),transparent)]
+                opacity-70 blur-lg
+              "
+            />
 
-          {/* PULSING AURA */}
-          <motion.span
-            initial={{ opacity: 0.3, scale: 1 }}
-            animate={{ opacity: 0.6, scale: 1.25 }}
-            transition={{
-              duration: 2.5,
-              repeat: Infinity,
-              repeatType: "mirror",
-              ease: "easeInOut",
-            }}
-            className="
-              absolute inset-0 -z-10 rounded-xl
-              bg-[radial-gradient(circle,_rgba(99,102,241,0.55)_0%,_transparent_70%)]
-              blur-xl
-            "
-          />
+            {/* BREATHING GLOW */}
+            <motion.span
+              initial={{ opacity: 0.3, scale: 1 }}
+              animate={{ opacity: 0.85, scale: 1.15 }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                repeatType: "mirror",
+                ease: "easeInOut",
+              }}
+              className="
+                absolute inset-0 -z-20 rounded-xl
+                bg-[radial-gradient(circle,_rgba(124,58,237,0.55)_0%,_transparent_75%)]
+                blur-2xl
+              "
+            />
 
-          {/* WAVE BORDER */}
-          <motion.span
-            initial={{ opacity: 0.6 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="
-              absolute inset-0 rounded-xl border-2 border-[#7C3AED]
-              [mask:linear-gradient(0deg,transparent_0%,black_40%,black_60%,transparent_100%)]
-              animate-[spin_3s_linear_infinite]
-            "
-          />
-        </motion.button>
+            {/* PULSING AURA */}
+            <motion.span
+              initial={{ opacity: 0.3, scale: 1 }}
+              animate={{ opacity: 0.6, scale: 1.25 }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                repeatType: "mirror",
+                ease: "easeInOut",
+              }}
+              className="
+                absolute inset-0 -z-10 rounded-xl
+                bg-[radial-gradient(circle,_rgba(99,102,241,0.55)_0%,_transparent_70%)]
+                blur-xl
+              "
+            />
+
+            {/* WAVE BORDER */}
+            <motion.span
+              initial={{ opacity: 0.6 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="
+                absolute inset-0 rounded-xl border-2 border-[#7C3AED]
+                [mask:linear-gradient(0deg,transparent_0%,black_40%,black_60%,transparent_100%)]
+                animate-[spin_3s_linear_infinite]
+              "
+            />
+          </motion.button>
+        </div>
+
+        {/* ПРАВАЯ КОЛОНКА — ДЕКОРАТИВНЫЙ ГРАДИЕНТ (как на макете) */}
+        {isDarkTheme && (
+          <div className="hidden lg:flex justify-center">
+            <div
+              className="
+                w-full h-80 rounded-3xl border border-gray-800 
+                bg-gradient-to-br from-indigo-500/40 via-purple-600/30 to-pink-600/20
+                shadow-[0_0_80px_rgba(79,70,229,0.35)]
+              "
+            />
+          </div>
+        )}
       </div>
     </section>
   );
