@@ -81,7 +81,6 @@ export default function App() {
         <FeaturesPage 
           onNavigateHome={navigateToHome} 
           onLoginClick={() => setShowAuthModal(true)}
-          onDemoClick={() => setShowDemoForm(true)}
           highlightedFeature={highlightedFeature}
           isDarkTheme={isDarkTheme}
           onToggleTheme={handleToggleTheme}
