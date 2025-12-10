@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Bot, FileText, Mic, FileCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -17,36 +17,36 @@ interface Feature {
 const featureList: Feature[] = [
   {
     id: "assistant",
-  title: "Юрист Ассистент",
-  description:
-    "ИИ-консультант отвечает на юридические вопросы, даёт рекомендации по действиям и помогает ориентироваться в законодательстве. Работает 24/7.",
-  icon: Bot,
-  image: "https://i.ibb.co/CK2Vp99n/image.jpg",
-},
-{
-  id: "contract",
-  title: "Анализ договоров",
-  description:
-    "ИИ-агент проверяет контракты, выделяет риски, предлагает правки и ведёт переговоры по стандартным пунктам. Полный цикл без вашего участия.",
-  icon: FileCheck,
-  image: "https://i.ibb.co/4HF3fgZ/image.jpg",
-},
-{
-  id: "transcription",
-  title: "Транскрибация аудио",
-  description:
-    "Автоматическая расшифровка встреч, судебных заседаний и консультаций. Выделение ключевых моментов и создание структурированных отчётов.",
-  icon: Mic,
-  image: "https://i.ibb.co/39hzgyWH/image.jpg",
-},
-{
-  id: "generator",
-  title: "Генератор документов",
-  description:
-    "Создание юридических документов по шаблонам с автоматическим заполнением данных. Претензии, договоры, дополнительные соглашения — всё готово за минуты.",
-  icon: FileText,
-  image: "https://i.ibb.co/8RrwRHn/image.jpg",
-},
+    title: "Юрист Ассистент",
+    description:
+      "ИИ-консультант отвечает на юридические вопросы, даёт рекомендации по действиям и помогает ориентироваться в законодательстве. Работает 24/7.",
+    icon: Bot,
+    image: "https://i.ibb.co/CK2Vp99n/image.jpg",
+  },
+  {
+    id: "contract",
+    title: "Анализ договоров",
+    description:
+      "ИИ-агент проверяет контракты, выделяет риски, предлагает правки и ведёт переговоры по стандартным пунктам. Полный цикл без вашего участия.",
+    icon: FileCheck,
+    image: "https://i.ibb.co/4HF3fgZ/image.jpg",
+  },
+  {
+    id: "transcription",
+    title: "Транскрибация аудио",
+    description:
+      "Автоматическая расшифровка встреч, консультаций и заседаний. Выделение ключевых моментов и подготовка итоговых отчётов.",
+    icon: Mic,
+    image: "https://i.ibb.co/39hzgyWH/image.jpg",
+  },
+  {
+    id: "generator",
+    title: "Генератор документов",
+    description:
+      "Создание юридических документов по шаблонам с автозаполнением. Претензии, договоры, соглашения — всё за минуты.",
+    icon: FileText,
+    image: "https://i.ibb.co/8RrwRHn/image.jpg",
+  },
 ];
 
 export function InteractiveFeatures({ isDarkTheme }: InteractiveFeaturesProps) {
