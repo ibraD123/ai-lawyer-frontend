@@ -51,17 +51,18 @@ export default function App() {
     setCurrentPage('home');
     setHighlightedFeature(null);
   };
-  
+
   const navigateToFeatures = (featureId?: string) => {
     setCurrentPage('features');
     setHighlightedFeature(featureId || null);
   };
-  
+
   const navigateToSecurity = () => setCurrentPage('security');
 
   const handleToggleTheme = () => {
     const newTheme = !isDarkTheme;
     setIsDarkTheme(newTheme);
+
     if (newTheme) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
@@ -71,21 +72,36 @@ export default function App() {
     }
   };
 
+  //
+  // ---------------------------
+  // DASHBOARD PAGE
+  // ---------------------------
+  //
   if (currentPage === 'dashboard' && isAuthenticated) {
     return <Dashboard onLogout={handleLogout} />;
   }
 
+  //
+  // ---------------------------
+  // FEATURES PAGE
+  // ---------------------------
+  //
   if (currentPage === 'features') {
     return (
       <>
         <FeaturesPage 
-          onNavigateHome={navigateToHome} 
+          onNavigateHome={navigateToHome}
           onLoginClick={() => setShowAuthModal(true)}
+          onDemoClick={() => setShowDemoForm(true)}     // ← ДОБАВЛЕНО
           highlightedFeature={highlightedFeature}
           isDarkTheme={isDarkTheme}
           onToggleTheme={handleToggleTheme}
         />
-        {showDemoForm && <ContactForm onClose={() => setShowDemoForm(false)} isDemo={true} />}
+
+        {showDemoForm && (
+          <ContactForm onClose={() => setShowDemoForm(false)} isDemo={true} />
+        )}
+
         {showAuthModal && (
           <AuthModal 
             onClose={() => setShowAuthModal(false)}
@@ -97,17 +113,25 @@ export default function App() {
     );
   }
 
+  //
+  // ---------------------------
+  // SECURITY PAGE
+  // ---------------------------
+  //
   if (currentPage === 'security') {
     return (
       <>
         <SecurityPage 
-          onNavigateHome={navigateToHome} 
+          onNavigateHome={navigateToHome}
           onLoginClick={() => setShowAuthModal(true)}
-          onDemoClick={() => setShowDemoForm(true)}
           isDarkTheme={isDarkTheme}
           onToggleTheme={handleToggleTheme}
         />
-        {showDemoForm && <ContactForm onClose={() => setShowDemoForm(false)} isDemo={true} />}
+
+        {showDemoForm && (
+          <ContactForm onClose={() => setShowDemoForm(false)} isDemo={true} />
+        )}
+
         {showAuthModal && (
           <AuthModal 
             onClose={() => setShowAuthModal(false)}
@@ -119,6 +143,11 @@ export default function App() {
     );
   }
 
+  //
+  // ---------------------------
+  // HOME PAGE
+  // ---------------------------
+  //
   return (
     <div className={`min-h-screen ${isDarkTheme ? 'bg-black' : 'bg-white'}`}>
       <Header 
@@ -130,13 +159,17 @@ export default function App() {
         isDarkTheme={isDarkTheme}
         onToggleTheme={handleToggleTheme}
       />
+
       <Hero isDarkTheme={isDarkTheme} onDemoClick={() => setShowDemoForm(true)} />
       <InteractiveFeatures isDarkTheme={isDarkTheme} />
       <Pricing isDarkTheme={isDarkTheme} />
       <AboutUs isDarkTheme={isDarkTheme} />
       <FinalCTA isDarkTheme={isDarkTheme} onDemoClick={() => setShowDemoForm(true)} />
-      
-      {showDemoForm && <ContactForm onClose={() => setShowDemoForm(false)} isDemo={true} />}
+
+      {showDemoForm && (
+        <ContactForm onClose={() => setShowDemoForm(false)} isDemo={true} />
+      )}
+
       {showAuthModal && (
         <AuthModal 
           onClose={() => setShowAuthModal(false)}
