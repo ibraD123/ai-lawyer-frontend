@@ -276,12 +276,6 @@ export function Dashboard({ onLogout }: DashboardProps) {
       ? `Режим: ${analysisPromptPreset}`
       : 'Свободный режим анализа';
 
-    const combinedPrompt =
-      presetText +
-      (analysisCustomPrompt.trim()
-        ? ` + доп. запрос: ${analysisCustomPrompt.trim()}`
-        : '');
-
     pushHistory(selectedTool, `Анализ документа: ${basePreview}`);
 
     setLoading(true);

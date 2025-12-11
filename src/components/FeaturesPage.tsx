@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bot, FileText, Mic, FileCheck, Search, Shield, FileSearch, Languages, Clock, AlertTriangle, Scale, Sparkles, Sun, Moon, User } from 'lucide-react';
+import { Bot, FileText, Mic, FileCheck, FileSearch, Scale, Sparkles, Sun, Moon, User } from 'lucide-react';
 
 interface FeaturesPageProps {
   onNavigateHome: () => void;
