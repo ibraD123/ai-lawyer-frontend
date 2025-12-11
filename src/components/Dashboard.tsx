@@ -35,6 +35,9 @@ interface ChatMessage {
   content: string;
 }
 
+const API_BASE =
+  (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:3001';
+
 const toolGroups: ToolGroup[] = [
   {
     id: 'consultant',
@@ -122,18 +125,17 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const [expandedGroup, setExpandedGroup] = useState<string | null>('generation');
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
 
+  // генерация документов
   const [inputValue, setInputValue] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  // генератор документов
   const [generatedText, setGeneratedText] = useState<string | null>(null);
+  const [generateLoading, setGenerateLoading] = useState(false);
 
   // чат консультанта
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [chatSending, setChatSending] = useState(false);
 
-  // анализ документов (двухпанельный режим)
+  // анализ документов
   const [documentPreview, setDocumentPreview] = useState<string>('Документ ещё не загружен.');
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [analysisPromptPreset, setAnalysisPromptPreset] = useState<string | null>(
@@ -141,6 +143,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
   );
   const [analysisCustomPrompt, setAnalysisCustomPrompt] = useState<string>('');
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
 
   // история
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -170,11 +173,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
         },
       ]);
     }
-    if (selectedTool?.id !== 'consultant-main') {
-      // при переключении на другой инструмент чисто визуально не трогаем историю чата,
-      // чтобы при возврате пользователь видел диалог. Если хочешь сбрасывать — можно очистить тут.
-    }
-  }, [selectedTool]);
+  }, [selectedTool, chatMessages.length]);
 
   const toggleGroup = (groupId: string) => {
     setExpandedGroup(expandedGroup === groupId ? null : groupId);
@@ -186,15 +185,14 @@ export function Dashboard({ onLogout }: DashboardProps) {
     // сброс состояний генерации / анализа
     setInputValue('');
     setGeneratedText(null);
+    setGenerateLoading(false);
+
     setAnalysisResult(null);
+    setAnalysisLoading(false);
     setUploadedFileName(null);
     setDocumentPreview('Документ ещё не загружен.');
     setAnalysisCustomPrompt('');
     setAnalysisPromptPreset('Краткая выжимка и структура');
-    setLoading(false);
-
-    // чат отдельно не очищаем (см. useEffect выше),
-    // чтобы при возвращении в консультанта диалог сохранялся
   };
 
   const pushHistory = (tool: Tool, preview: string) => {
@@ -208,32 +206,13 @@ export function Dashboard({ onLogout }: DashboardProps) {
     setHistory((prev) => [item, ...prev].slice(0, 10));
   };
 
-  // генерация документов
-  const handleRunTextTool = () => {
-    if (!selectedTool || selectedTool.id === 'consultant-main') return;
-    const trimmed = inputValue.trim();
-    const preview = trimmed || '(пустой запрос — пользователь ничего не ввёл)';
+  const isAnalysisTool = selectedTool?.id === 'doc-analysis';
+  const isConsultant = selectedTool?.id === 'consultant-main';
 
-    pushHistory(selectedTool, preview);
-    setLoading(true);
-    setGeneratedText(null);
-
-    setTimeout(() => {
-      const baseTitle = `Черновик документа «${selectedTool.name}»`;
-
-      const body =
-        trimmed ||
-        'Пользователь не указал деталей, текст будет дополнен после интеграции с моделью.';
-
-      setGeneratedText(
-        `${baseTitle}\n\n(Здесь будет реальный текст от модели на основе API DEXLEY.)\n\nЗапрос пользователя:\n${body}`,
-      );
-      setLoading(false);
-    }, 900);
-  };
-
-  // чат консультанта
-  const handleSendChat = () => {
+  // ------------------------------
+  // ЧАТ-КОНСУЛЬТАНТ → /api/consult
+  // ------------------------------
+  const handleSendChat = async () => {
     if (!selectedTool || selectedTool.id !== 'consultant-main') return;
     const trimmed = chatInput.trim();
     if (!trimmed || chatSending) return;
@@ -244,27 +223,115 @@ export function Dashboard({ onLogout }: DashboardProps) {
       content: trimmed,
     };
 
-    setChatMessages((prev) => [...prev, userMsg]);
+    const newMessages = [...chatMessages, userMsg];
+    setChatMessages(newMessages);
     setChatInput('');
     setChatSending(true);
 
     pushHistory(selectedTool, trimmed);
 
-    setTimeout(() => {
-      const assistantMsg: ChatMessage = {
-        id: `a-${Date.now()}`,
-        role: 'assistant',
-        content:
-          'Здесь появится детальный ответ ИИ-юриста на основе подключенной модели и ваших документов. ' +
-          'На MVP это демо-ответ. В production DEXLEY будет ссылаться на нормы закона и судебную практику.',
-      };
-      setChatMessages((prev) => [...prev, assistantMsg]);
+    try {
+      const response = await fetch(`${API_BASE}/api/consult`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: newMessages.map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.answer) {
+        const fallback =
+          data?.error ||
+          'Не удалось получить ответ от DEXLEY. Попробуйте переформулировать запрос или повторить позже.';
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            id: `a-${Date.now()}`,
+            role: 'assistant',
+            content: fallback,
+          },
+        ]);
+      } else {
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            id: `a-${Date.now()}`,
+            role: 'assistant',
+            content: data.answer as string,
+          },
+        ]);
+      }
+    } catch (err) {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          id: `a-${Date.now()}`,
+          role: 'assistant',
+          content:
+            'Возникла техническая ошибка при обращении к модели. Попробуйте ещё раз чуть позже.',
+        },
+      ]);
+    } finally {
       setChatSending(false);
-    }, 1000);
+    }
   };
 
-  // анализ документа
-  const handleRunAnalysis = () => {
+  // --------------------------------
+  // ГЕНЕРАЦИЯ ДОКУМЕНТОВ → /api/generate
+  // --------------------------------
+  const handleRunTextTool = async () => {
+    if (!selectedTool || selectedTool.id === 'consultant-main') return;
+
+    const trimmed = inputValue.trim();
+    const preview = trimmed || '(пустой запрос — пользователь ничего не ввёл)';
+
+    pushHistory(selectedTool, preview);
+    setGenerateLoading(true);
+    setGeneratedText(null);
+
+    try {
+      const response = await fetch(`${API_BASE}/api/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          toolId: selectedTool.id,
+          toolName: selectedTool.name,
+          prompt: trimmed,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.draft) {
+        const fallback =
+          data?.error ||
+          'Не удалось сгенерировать документ. Попробуйте немного уточнить условия и повторить запрос.';
+        setGeneratedText(fallback);
+      } else {
+        setGeneratedText(data.draft as string);
+      }
+    } catch (err) {
+      setGeneratedText(
+        'Произошла ошибка при обращении к серверу. Попробуйте ещё раз чуть позже.'
+      );
+    } finally {
+      setGenerateLoading(false);
+    }
+  };
+
+  // ----------------------------
+  // АНАЛИЗ ДОКУМЕНТА → /api/analyze
+  // ----------------------------
+  const handleRunAnalysis = async () => {
     if (!selectedTool) return;
 
     const basePreview =
@@ -272,26 +339,41 @@ export function Dashboard({ onLogout }: DashboardProps) {
       documentPreview.slice(0, 120) ||
       'Документ без названия';
 
-    const presetText = analysisPromptPreset
-      ? `Режим: ${analysisPromptPreset}`
-      : 'Свободный режим анализа';
-
     pushHistory(selectedTool, `Анализ документа: ${basePreview}`);
 
-    setLoading(true);
+    setAnalysisLoading(true);
     setAnalysisResult(null);
 
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${API_BASE}/api/analyze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: documentPreview,
+          preset: analysisPromptPreset,
+          customPrompt: analysisCustomPrompt,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.analysis) {
+        const fallback =
+          data?.error ||
+          'Не удалось провести анализ документа. Попробуйте ещё раз немного позже.';
+        setAnalysisResult(fallback);
+      } else {
+        setAnalysisResult(data.analysis as string);
+      }
+    } catch (err) {
       setAnalysisResult(
-        `Встроенный baseline-промпт:\n${presetText}\n\n` +
-          '(Здесь будет реальный результат анализа от модели: краткая выжимка, ' +
-          'риски, ключевые условия, реквизиты и рекомендации, адаптированные под ваш запрос.)\n\n' +
-          (analysisCustomPrompt.trim()
-            ? `Дополнительные указания пользователя:\n${analysisCustomPrompt.trim()}`
-            : ''),
+        'Произошла ошибка при обращении к серверу. Попробуйте ещё раз чуть позже.'
       );
-      setLoading(false);
-    }, 1100);
+    } finally {
+      setAnalysisLoading(false);
+    }
   };
 
   // скачивание генерации
@@ -334,9 +416,6 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
   };
-
-  const isAnalysisTool = selectedTool?.id === 'doc-analysis';
-  const isConsultant = selectedTool?.id === 'consultant-main';
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -459,7 +538,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
                 {selectedTool.description}
               </p>
 
-              {/* ----------------- АНАЛИЗ ДОКУМЕНТОВ ----------------- */}
+              {/* АНАЛИЗ ДОКУМЕНТОВ */}
               {isAnalysisTool ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* ЛЕВАЯ ПАНЕЛЬ */}
@@ -577,7 +656,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
                     </button>
 
                     <div className="flex-1 border border-gray-200 rounded-lg bg-gray-50 p-4 text-sm text-gray-800 overflow-auto">
-                      {loading ? (
+                      {analysisLoading ? (
                         <div className="space-y-3 animate-pulse">
                           <div className="h-3 bg-gray-300 rounded w-3/4" />
                           <div className="h-3 bg-gray-300 rounded w-5/6" />
@@ -597,7 +676,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
                   </div>
                 </div>
               ) : isConsultant ? (
-                /* ----------------- ЧАТ КОНСУЛЬТАНТА ----------------- */
+                /* ЧАТ КОНСУЛЬТАНТА */
                 <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 shadow-sm flex flex-col h-[600px] max-h-[75vh]">
                   <div className="mb-3 text-xs text-gray-500">
                     DEXLEY сфокусирован только на юридических вопросах. Если запрос не относится
@@ -605,9 +684,9 @@ export function Dashboard({ onLogout }: DashboardProps) {
                   </div>
 
                   {/* быстрые подсказки */}
-                  <div className="mb-4">
-                    <p className="text-xs text-gray-500 mb-2">
-                      Популярные запросы — нажмите, чтобы подставить:
+                  <div className="mb-5">
+                    <p className="text-sm text-gray-600 mb-3">
+                      Готовые примеры вопросов — помогут быстро начать диалог:
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {[
@@ -668,7 +747,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
                       <textarea
                         className="flex-1 min-h-[60px] max-h-[120px] px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F46E5] text-sm resize-none"
                         placeholder={
-                          selectedTool.placeholder ||
+                          selectedTool?.placeholder ||
                           'Опишите ситуацию: стороны, договор, суммы, сроки, что произошло и чего вы хотите добиться.'
                         }
                         value={chatInput}
@@ -691,7 +770,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
                   </div>
                 </div>
               ) : (
-                /* ----------------- ГЕНЕРАЦИЯ ДОКУМЕНТОВ ----------------- */
+                /* ГЕНЕРАЦИЯ ДОКУМЕНТОВ */
                 <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 shadow-sm">
                   <div className="space-y-6">
                     <p className="text-sm text-gray-500">
@@ -705,7 +784,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
                       </label>
                       <textarea
                         className="w-full h-40 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent resize-none"
-                        placeholder={selectedTool.placeholder}
+                        placeholder={selectedTool?.placeholder}
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                       />
@@ -713,9 +792,10 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
                     <button
                       onClick={handleRunTextTool}
-                      className="px-6 py-3 bg-[#4F46E5] text-white rounded-lg hover:bg-[#4338CA] transition"
+                      className="px-6 py-3 bg-[#4F46E5] text-white rounded-lg hover:bg-[#4338CA] transition disabled:opacity-60"
+                      disabled={generateLoading}
                     >
-                      Сгенерировать документ
+                      {generateLoading ? 'Генерация…' : 'Сгенерировать документ'}
                     </button>
                   </div>
 
@@ -734,7 +814,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
                         </button>
                       </div>
 
-                      {loading ? (
+                      {generateLoading ? (
                         <div className="space-y-3 animate-pulse">
                           <div className="h-3 bg-gray-300 rounded w-3/4" />
                           <div className="h-3 bg-gray-300 rounded w-5/6" />
