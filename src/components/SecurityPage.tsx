@@ -13,32 +13,32 @@ const securityFeatures = [
   {
     icon: Lock,
     title: 'Шифрование данных',
-    description: 'Все данные шифруются end-to-end с использованием AES-256. Ваши документы защищены как при передаче, так и при хранении.'
+    description: 'Все данные шифруются end-to-end с использованием AES-256.'
   },
   {
     icon: Server,
     title: 'Изолированное хранилище',
-    description: 'Данные каждого клиента хранятся в изолированной среде. Мы используем технологии контейнеризации для максимальной безопасности.'
+    description: 'Данные каждого клиента изолированы контейнеризацией.'
   },
   {
     icon: Eye,
     title: 'Конфиденциальность',
-    description: 'Мы не используем ваши данные для обучения общедоступных моделей. Информация клиентов остаётся строго конфиденциальной.'
+    description: 'Мы не используем ваши данные для обучения моделей.'
   },
   {
     icon: FileCheck,
     title: 'Соответствие стандартам',
-    description: 'Платформа соответствует требованиям GDPR и российского законодательства о персональных данных.'
+    description: 'GDPR и российские стандарты соблюдаются.'
   },
   {
     icon: Shield,
     title: 'Регулярные аудиты',
-    description: 'Мы проводим регулярные проверки безопасности и тестирования на проникновение с привлечением независимых экспертов.'
+    description: 'Регулярные проверки и тестирования безопасности.'
   },
   {
     icon: Award,
     title: 'SLA гарантии',
-    description: 'Для Enterprise-клиентов предоставляем SLA с гарантией доступности 99.9% и круглосуточной поддержкой.'
+    description: 'Для Enterprise — SLA 99.9% и поддержка 24/7.'
   }
 ];
 
@@ -48,7 +48,6 @@ export function SecurityPage({ onNavigateHome, onLoginClick, isDarkTheme, onTogg
   return (
     <div className={`min-h-screen ${isDarkTheme ? 'bg-black' : 'bg-white'}`}>
       
-      {/* HEADER */}
       <header className={`fixed top-0 left-0 right-0 z-50 border-b ${isDarkTheme ? 'bg-black border-gray-800' : 'bg-white border-gray-200'}`}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           
@@ -58,8 +57,10 @@ export function SecurityPage({ onNavigateHome, onLoginClick, isDarkTheme, onTogg
               <Scale className="w-6 h-6 text-indigo-500" />
               <Sparkles className="w-3 h-3 text-indigo-300 absolute -top-1 -right-1" />
             </div>
-            <span className="text-indigo-500">Юрист</span>
-            <span className={isDarkTheme ? 'text-white' : 'text-gray-900'}>ИИ</span>
+
+            {/* BRAND UPDATED */}
+            <span className="text-indigo-500">DEX</span>
+            <span className={isDarkTheme ? 'text-white' : 'text-gray-900'}>LEY</span>
           </button>
 
           {/* RIGHT SIDE */}
@@ -86,21 +87,19 @@ export function SecurityPage({ onNavigateHome, onLoginClick, isDarkTheme, onTogg
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN */}
       <main className="pt-32 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
 
-          {/* TITLE */}
           <div className="max-w-3xl mx-auto text-center mb-16">
             <h1 className={`text-6xl font-semibold mb-6 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
               Безопасность и надежность
             </h1>
             <p className={`text-xl ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
-              Мы понимаем важность конфиденциальности юридической информации. Безопасность ваших данных — наш главный приоритет.
+              Безопасность данных — ключевой принцип DEXLEY.
             </p>
           </div>
 
-          {/* FEATURES GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             {securityFeatures.map((feature, index) => {
               const Icon = feature.icon;
@@ -128,16 +127,16 @@ export function SecurityPage({ onNavigateHome, onLoginClick, isDarkTheme, onTogg
           {/* CTA */}
           <div className={`${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'} rounded-2xl p-12 text-center`}>
             <h2 className={`text-3xl mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-              Нам можно доверять
+              Нам доверяют
             </h2>
             <p className={`text-xl max-w-2xl mx-auto mb-8 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
-              Более 500 юридических компаний уже используют ЮристИИ. Ваши данные в безопасности.
+              Сотни компаний выбирают DEXLEY.
             </p>
             <button 
               onClick={() => setShowContactForm(true)}
               className="px-8 py-4 text-lg rounded-lg bg-indigo-600 text-white hover:bg-indigo-500 transition"
             >
-              Узнать больше о безопасности
+              Узнать подробнее
             </button>
           </div>
         </div>

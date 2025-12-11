@@ -25,10 +25,10 @@ const services: Service[] = [
     title: 'Юрист Ассистент',
     description: 'ИИ-консультант, который отвечает на юридические вопросы в режиме реального времени',
     benefits: [
-      'Мгновенные ответы на правовые вопросы',
+      'Мгновенные ответы',
       'Рекомендации по действиям',
       'Ссылки на законодательство',
-      'Работа 24/7 без выходных'
+      'Работа 24/7'
     ]
   },
   {
@@ -37,123 +37,47 @@ const services: Service[] = [
     title: 'Анализ договоров',
     description: 'Автоматическая проверка контрактов на риски и несоответствия',
     benefits: [
-      'Выявление рисковых пунктов',
+      'Выявление рисков',
       'Предложения по правкам',
-      'Сравнение с эталонными шаблонами',
-      'Проверка на соответствие законодательству'
+      'Сравнение с шаблонами',
+      'Проверка соответствия'
     ]
   },
   {
     id: 'extraction',
     icon: FileSearch,
     title: 'Извлечение данных',
-    description: 'Автоматическое извлечение структурированной информации из документов',
-    benefits: [
-      'Извлечение реквизитов и дат',
-      'Определение сторон сделки',
-      'Выделение финансовых условий',
-      'Экспорт в структурированные форматы'
-    ]
+    description: 'Извлечение ключевой информации из документов',
+    benefits: ['Реквизиты', 'Финансы', 'Условия', 'Авто-структурирование']
   },
   {
     id: 'generator',
     icon: FileText,
     title: 'Генератор документов',
-    description: 'Создание юридических документов по готовым шаблонам',
-    benefits: [
-      'Библиотека из 200+ шаблонов',
-      'Автоматическое заполнение данных',
-      'Соответствие актуальному законодательству',
-      'Экспорт в Word и PDF'
-    ]
+    description: 'Создание юридических документов по шаблонам',
+    benefits: ['200+ шаблонов', 'Автозаполнение', 'PDF/Word', 'Актуальность']
   },
   {
     id: 'transcription',
     icon: Mic,
     title: 'Транскрибация аудио',
-    description: 'Расшифровка аудиозаписей встреч и консультаций',
-    benefits: [
-      'Высокая точность распознавания',
-      'Выделение ключевых моментов',
-      'Разделение по спикерам',
-      'Создание структурированных отчётов'
-    ]
-  },
-  {
-    id: 'qa',
-    icon: Search,
-    title: 'Ответы на вопросы',
-    description: 'Интеллектуальный поиск ответов в базе документов и законодательстве',
-    benefits: [
-      'Поиск по контексту, а не по ключевым словам',
-      'Анализ релевантности результатов',
-      'Цитаты с указанием источников',
-      'История запросов и ответов'
-    ]
-  },
-  {
-    id: 'compliance',
-    icon: Shield,
-    title: 'Проверка на соответствие',
-    description: 'Контроль соответствия документов нормативным требованиям',
-    benefits: [
-      'Проверка по актуальным стандартам',
-      'Выявление несоответствий',
-      'Рекомендации по исправлению',
-      'Отчёты для аудита'
-    ]
-  },
-  {
-    id: 'summary',
-    icon: Clock,
-    title: 'Краткая выжимка',
-    description: 'TL;DR любого документа — основные положения в сжатом виде',
-    benefits: [
-      'Экономия времени на изучении документов',
-      'Выделение ключевых условий',
-      'Важные даты и сроки',
-      'Финансовые условия'
-    ]
-  },
-  {
-    id: 'risks',
-    icon: AlertTriangle,
-    title: 'Проверка рисков',
-    description: 'Выявление потенциальных угроз и слабых мест в документах',
-    benefits: [
-      'Анализ рисковых формулировок',
-      'Оценка степени риска',
-      'Рекомендации по минимизации',
-      'Сравнение с рыночной практикой'
-    ]
-  },
-  {
-    id: 'translation',
-    icon: Languages,
-    title: 'Перевод + анализ',
-    description: 'Перевод юридических документов с сохранением терминологии',
-    benefits: [
-      'Точный перевод юридической лексики',
-      'Сохранение структуры документа',
-      'Одновременный анализ содержания',
-      'Поддержка 15+ языков'
-    ]
+    description: 'Перевод аудио в точный юридический текст',
+    benefits: ['Высокая точность', 'Ключевые моменты', 'Спикеры', 'Отчёты']
   }
 ];
 
 export function FeaturesPage({ onNavigateHome, onLoginClick, onDemoClick, highlightedFeature, isDarkTheme, onToggleTheme }: FeaturesPageProps) {
+  
   const serviceRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const [animatedFeature, setAnimatedFeature] = useState<string | null>(null);
 
   useEffect(() => {
     if (highlightedFeature && serviceRefs.current[highlightedFeature]) {
-      // Scroll to the highlighted feature
       setTimeout(() => {
         serviceRefs.current[highlightedFeature]?.scrollIntoView({ 
           behavior: 'smooth', 
           block: 'center' 
         });
-        // Trigger highlight animation
         setAnimatedFeature(highlightedFeature);
         setTimeout(() => setAnimatedFeature(null), 2000);
       }, 100);
@@ -162,18 +86,20 @@ export function FeaturesPage({ onNavigateHome, onLoginClick, onDemoClick, highli
 
   return (
     <div className={`min-h-screen ${isDarkTheme ? 'bg-black' : 'bg-white'}`}>
-      {/* Header */}
+      
       <header className={`fixed top-0 left-0 right-0 z-50 ${isDarkTheme ? 'bg-black border-gray-800' : 'bg-white border-gray-200'} border-b`}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+
           <button onClick={onNavigateHome} className="flex items-center gap-2 text-xl tracking-tight">
             <div className="relative">
               <Scale className="w-6 h-6 text-[#4F46E5]" />
               <Sparkles className="w-3 h-3 text-[#818CF8] absolute -top-1 -right-1" />
             </div>
-            <span className="text-[#4F46E5]">Юрист</span>
-            <span className={isDarkTheme ? 'text-white' : 'text-gray-900'}>ИИ</span>
+            {/* BRAND UPDATED */}
+            <span className="text-[#4F46E5]">DEX</span>
+            <span className={isDarkTheme ? 'text-white' : 'text-gray-900'}>LEY</span>
           </button>
-          
+
           <div className="flex items-center gap-4">
             <button 
               onClick={onToggleTheme}
@@ -202,15 +128,16 @@ export function FeaturesPage({ onNavigateHome, onLoginClick, onDemoClick, highli
         </div>
       </header>
 
-      {/* Main content */}
+      {/* MAIN */}
       <main className="pt-32 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
+
           <div className="max-w-3xl mx-auto text-center mb-16">
             <h1 className={`text-6xl mb-6 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-              Все возможности
+              Все возможности DEXLEY
             </h1>
             <p className={`text-xl ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
-              Полный каталог инструментов для автоматизации юридической работы
+              Каталог инструментов для автоматизации юридической работы
             </p>
           </div>
 
